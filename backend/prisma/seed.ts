@@ -141,11 +141,12 @@ const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  
   // Landing CMS defaults (ar / en / ku)
   await prisma.landingPage.deleteMany({ where: { id: 'main' } }).catch(() => undefined);
   for (const locale of LANDING_LOCALES) {
-    const data = defaultLandingByLocale[locale] as Record<string, unknown>;
+    const raw = defaultLandingByLocale[locale] as Record<string, unknown>;
+    const { logoUrl: _logoUrl, ...data } = raw;
     const landing = await prisma.landingPage.upsert({
       where: { id: locale },
       create: { id: locale, ...data } as never,
-      update: {},
+      update: data as never,
     });
     console.log(`Seeded landing page [${locale}]: ${landing.brandName}`);
   }

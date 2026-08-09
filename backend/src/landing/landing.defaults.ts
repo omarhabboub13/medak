@@ -14,7 +14,6 @@ export const LOCALE_META: Record<
 const sharedUrls = {
   appStoreUrl: '',
   playStoreUrl: '',
-  logoUrl: '/medak-logo.svg',
 };
 
 export const defaultLandingByLocale: Record<
