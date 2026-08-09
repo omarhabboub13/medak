@@ -84,7 +84,7 @@ function TitleDescListEditor({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium text-gray-700">{itemLabel}</p>
         <button
           type="button"
@@ -141,18 +141,21 @@ function StringListEditor({
 }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium text-gray-700">{itemLabel}</p>
         <button
           type="button"
           onClick={() => onChange([...items, ""])}
-          className="text-sm rounded-lg bg-[var(--color-teal)] text-white px-3 py-1.5"
+          className="shrink-0 text-sm rounded-lg bg-[var(--color-teal)] text-white px-3 py-1.5"
         >
           {labels.add}
         </button>
       </div>
       {items.map((item, index) => (
-        <div key={index} className="flex gap-2 items-start">
+        <div
+          key={index}
+          className="flex flex-col gap-2 sm:flex-row sm:items-start"
+        >
           <input
             value={item}
             onChange={(e) =>
@@ -163,7 +166,7 @@ function StringListEditor({
           <button
             type="button"
             onClick={() => onChange(items.filter((_, i) => i !== index))}
-            className="shrink-0 text-sm text-red-600 px-2 py-2"
+            className="shrink-0 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"
           >
             {labels.delete}
           </button>
@@ -246,6 +249,7 @@ function AdminDashboard() {
   const router = useRouter();
   const { dir, locale: contentLang, tt } = useLocale();
   const [tab, setTab] = useState<Tab>("hero");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [content, setContent] = useState<LandingContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -346,11 +350,48 @@ function AdminDashboard() {
   }
 
   return (
-    <div dir={dir} className="min-h-screen bg-gray-50 flex">
-      <aside className="w-64 shrink-0 sticky top-0 h-screen bg-white border-e border-gray-200 flex flex-col">
-        <div className="px-5 py-5 border-b border-gray-100">
-          <p className="text-xl font-bold text-[var(--color-teal)]">مدك</p>
-          <p className="text-xs text-gray-500 mt-1">{tt("adminTitle")}</p>
+    <div dir={dir} className="min-h-screen bg-gray-50 lg:flex">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label={tt("closeMenu")}
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 z-40 flex w-[min(18rem,88vw)] flex-col bg-white border-e border-gray-200 transition-transform duration-200 ease-out lg:static lg:z-auto lg:h-screen lg:w-64 lg:shrink-0 lg:translate-x-0 ${
+          dir === "rtl" ? "right-0" : "left-0"
+        } ${
+          sidebarOpen
+            ? "translate-x-0"
+            : dir === "rtl"
+              ? "translate-x-full lg:translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2 px-5 py-4 border-b border-gray-100 lg:block lg:py-5">
+          <div>
+            <p className="text-xl font-bold text-[var(--color-teal)]">مدك</p>
+            <p className="text-xs text-gray-500 mt-1">{tt("adminTitle")}</p>
+          </div>
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 lg:hidden"
+            aria-label={tt("closeMenu")}
+            onClick={() => setSidebarOpen(false)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path
+                d="M6 6l12 12M18 6L6 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
@@ -361,7 +402,10 @@ function AdminDashboard() {
             <button
               key={t.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setTab(t.id);
+                setSidebarOpen(false);
+              }}
               className={`w-full text-start rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                 tab === t.id
                   ? "bg-teal-50 text-[var(--color-teal)]"
@@ -381,55 +425,96 @@ function AdminDashboard() {
         </div>
       </aside>
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-10">
-          <div>
-            <h1 className="text-lg font-bold text-ink">{tt(tabs.find((t) => t.id === tab)!.labelKey)}</h1>
-            <p className="text-sm text-gray-500">
-              {LOCALE_META[contentLang].native}
-            </p>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 border-b border-gray-200 bg-white px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-[var(--color-teal)] lg:hidden"
+                aria-label={tt("menu")}
+                aria-expanded={sidebarOpen}
+                onClick={() => setSidebarOpen(true)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <path
+                    d="M4 7h16M4 12h16M4 17h16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-bold text-ink sm:text-lg">
+                  {tt(tabs.find((t) => t.id === tab)!.labelKey)}
+                </h1>
+                <p className="text-xs text-gray-500 sm:text-sm">
+                  {LOCALE_META[contentLang].native}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/"
+                target="_blank"
+                className="rounded-lg border border-gray-300 px-3 py-2 text-xs sm:px-4 sm:text-sm"
+              >
+                {tt("preview")}
+              </Link>
+              <button
+                type="button"
+                onClick={resetDefaults}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-xs sm:px-4 sm:text-sm"
+              >
+                {tt("reset")}
+              </button>
+              <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                className="rounded-lg bg-[var(--color-teal)] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50 sm:px-5 sm:text-sm"
+              >
+                {saving ? tt("saving") : tt("save")}
+              </button>
+              <button
+                type="button"
+                onClick={logout}
+                className="rounded-lg px-2 py-2 text-xs text-red-600 sm:px-3 sm:text-sm"
+              >
+                {tt("logout")}
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            <Link
-              href="/"
-              target="_blank"
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
-            >
-              {tt("preview")}
-            </Link>
-            <button
-              type="button"
-              onClick={resetDefaults}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
-            >
-              {tt("reset")}
-            </button>
-            <button
-              type="button"
-              onClick={save}
-              disabled={saving}
-              className="rounded-lg bg-[var(--color-teal)] text-white font-semibold px-5 py-2 text-sm disabled:opacity-50"
-            >
-              {saving ? tt("saving") : tt("save")}
-            </button>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-lg text-red-600 px-3 py-2 text-sm"
-            >
-              {tt("logout")}
-            </button>
+
+          {/* Mobile section chips */}
+          <div className="mt-3 -mx-3 flex gap-2 overflow-x-auto px-3 pb-1 lg:hidden">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  tab === t.id
+                    ? "bg-[var(--color-teal)] text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {tt(t.labelKey)}
+              </button>
+            ))}
           </div>
         </header>
 
         {msg && (
-          <div className="mx-6 mt-4 text-sm bg-teal-50 text-teal-900 border border-teal-100 rounded-lg px-4 py-3">
+          <div className="mx-3 mt-3 text-sm bg-teal-50 text-teal-900 border border-teal-100 rounded-lg px-3 py-3 sm:mx-6 sm:mt-4 sm:px-4">
             {msg}
           </div>
         )}
 
-        <div className="flex-1 p-6">
-          <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4 max-w-3xl">
+        <div className="flex-1 p-3 sm:p-4 lg:p-6">
+          <div className="mx-auto max-w-3xl space-y-4 rounded-xl border border-gray-100 bg-white p-4 sm:p-6">
             {tab === "hero" && (
             <>
               <Field
