@@ -10,19 +10,20 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import ForWhom from "@/components/landing/ForWhom";
 import CTAFooter from "@/components/landing/CTAFooter";
 import { LocaleProvider, useLocale } from "@/lib/LocaleProvider";
-import {
-  FALLBACK_LANDING,
-  type LandingContent,
-} from "@/lib/landing-types";
+import type { LandingContent } from "@/lib/landing-types";
+import { getLandingFallback } from "@/lib/landing-defaults";
 
 function LandingBody() {
   const { locale, dir } = useLocale();
-  const [content, setContent] = useState<LandingContent>(FALLBACK_LANDING);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState<LandingContent>(() =>
+    getLandingFallback(locale),
+  );
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    // Switch UI text immediately (API may be offline)
+    setContent(getLandingFallback(locale));
+
     const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
     fetch(`${base}/landing?lang=${locale}`)
       .then((r) => (r.ok ? r.json() : null))
@@ -30,23 +31,13 @@ function LandingBody() {
         if (!cancelled && data) setContent(data as LandingContent);
       })
       .catch(() => {
-        if (!cancelled) setContent(FALLBACK_LANDING);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        // Keep locale fallback already applied
       });
+
     return () => {
       cancelled = true;
     };
   }, [locale]);
-
-  if (loading && !content.heroTitle) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        ...
-      </div>
-    );
-  }
 
   return (
     <main dir={dir} className="min-h-screen bg-sand text-ink">
