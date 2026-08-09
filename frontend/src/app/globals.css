@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  /* App palette — from Medak AppThemes / ColorRes */
+  --color-sand: #F6FDFB; /* Iceberg — screen background */
+  --color-ink: #202020; /* Dark Jungle Green — primary text */
+
+  --color-teal-50: #E6F9F6;
+  --color-teal-100: #AAFAF1; /* Crystal Blue */
+  --color-teal: #07A997; /* Primary */
+  --color-teal-600: #07A997;
+  --color-teal-700: #068F7F;
+  --color-teal-900: #045C54;
+  --color-teal-950: #034740;
+
+  /* Accent CTAs — Warning / Mango Orange from app palette */
+  --color-coral: #FF842B;
+  --color-coral-600: #FF842B;
+  --color-coral-700: #F0933E; /* Faded Orange */
+
+  --color-sky: #4D92E2; /* Dark Sky Blue */
+  --color-sky-dark: #4378C8; /* Tufts Blue */
+
+  --font-display: var(--font-cairo), sans-serif;
+  --font-body: var(--font-plex-arabic), sans-serif;
+}
+
+::selection {
+  background-color: #07a997;
+  color: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.pulse-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-pulse 2.6s ease-out forwards;
+}
+
+@keyframes draw-pulse {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.pulse-dot {
+  position: relative;
+}
+
+.pulse-dot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.6;
+  animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
