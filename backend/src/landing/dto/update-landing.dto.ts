@@ -3,6 +3,7 @@ import { IsArray, IsOptional, IsString } from 'class-validator';
 export class UpdateLandingDto {
   @IsOptional() @IsString() brandName?: string;
   @IsOptional() @IsString() brandNameEn?: string;
+  @IsOptional() @IsString() logoUrl?: string;
   @IsOptional() @IsString() heroTitle?: string;
   @IsOptional() @IsString() heroHighlight?: string;
   @IsOptional() @IsString() heroSubtitle?: string;

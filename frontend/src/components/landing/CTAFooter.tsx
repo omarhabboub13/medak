@@ -6,7 +6,7 @@ export default function CTAFooter({ content }: { content: LandingContent }) {
     <>
       <section
         id="download"
-        className="relative overflow-hidden border-t border-teal-100 bg-teal-900 px-6 py-28 text-white"
+        className="relative overflow-hidden border-t border-teal-100 bg-teal-900 px-4 py-20 text-white sm:px-6 sm:py-24 md:py-28"
       >
         <div
           aria-hidden
@@ -18,13 +18,10 @@ export default function CTAFooter({ content }: { content: LandingContent }) {
         />
 
         <div className="relative mx-auto max-w-3xl text-center">
-          <p className="font-display text-sm font-bold tracking-wide text-teal-100">
-            {content.brandNameEn}
-          </p>
-          <h2 className="mt-3 font-display text-3xl font-extrabold md:text-5xl">
+          <h2 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl md:text-5xl lg:text-6xl">
             {content.downloadTitle}
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-lg text-white/75">
+          <p className="mx-auto mt-5 max-w-xl text-base text-white/75 sm:text-lg md:text-xl">
             {content.downloadSubtitle}
           </p>
 

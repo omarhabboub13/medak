@@ -41,7 +41,7 @@ function LandingBody() {
 
   return (
     <main dir={dir} className="min-h-screen bg-sand text-ink">
-      <Navbar content={content} />
+      <Navbar />
       <Hero content={content} />
       <WhyMedak content={content} />
       <PatientFeatures content={content} />

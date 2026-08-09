@@ -253,6 +253,7 @@ model LandingPage {
   id                 String   @id // ar | en | ku
   brandName          String   @default("مدك")
   brandNameEn        String   @default("Medak")
+  logoUrl            String?  @db.Text
   heroTitle          String   @db.Text
   heroHighlight      String
   heroSubtitle       String   @db.Text

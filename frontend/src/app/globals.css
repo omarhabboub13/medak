@@ -44,14 +44,76 @@ html {
 }
 
 .pulse-path {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: draw-pulse 2.6s ease-out forwards;
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
+  animation: draw-pulse 7.5s ease-in-out infinite;
+}
+
+.pulse-end-dot {
+  opacity: 0;
+  animation: pulse-end-dot 7.5s ease-in-out infinite;
 }
 
 @keyframes draw-pulse {
-  to {
+  /* slow draw — strong */
+  0% {
+    stroke-dashoffset: 1600;
+    opacity: 0.25;
+  }
+  8% {
+    opacity: 1;
+  }
+  48% {
     stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  /* hold, then fade lighter */
+  58% {
+    stroke-dashoffset: 0;
+    opacity: 0.9;
+  }
+  68% {
+    stroke-dashoffset: 0;
+    opacity: 0.35;
+  }
+  /* soft redraw feel before reset */
+  78% {
+    stroke-dashoffset: 0;
+    opacity: 0.55;
+  }
+  88% {
+    stroke-dashoffset: 1600;
+    opacity: 0.2;
+  }
+  100% {
+    stroke-dashoffset: 1600;
+    opacity: 0.25;
+  }
+}
+
+@keyframes pulse-end-dot {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  48%,
+  58% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  68% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  78% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
   }
 }
 
