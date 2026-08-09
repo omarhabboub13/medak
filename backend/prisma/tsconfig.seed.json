@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "target": "ES2021",
+    "strict": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noImplicitAny": false
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "moduleResolution": "node"
+    }
+  },
+  "include": ["./seed.ts", "../src/landing/landing.defaults.ts"]
+}

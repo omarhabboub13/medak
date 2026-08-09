@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import {
   defaultLandingByLocale,
@@ -6,6 +6,51 @@ import {
 } from '../src/landing/landing.defaults';
 
 const prisma = new PrismaClient();
+
+/** Only fields that exist on LandingPage — never pass extras like logoUrl */
+const LANDING_KEYS = [
+  'brandName',
+  'brandNameEn',
+  'heroTitle',
+  'heroHighlight',
+  'heroSubtitle',
+  'heroSupport',
+  'whyTitle',
+  'whyIntro',
+  'whyItems',
+  'patientsTitle',
+  'patientsIntro',
+  'patientFeatures',
+  'doctorsTitle',
+  'doctorsIntro',
+  'doctorFeatures',
+  'howTitle',
+  'howIntro',
+  'howSteps',
+  'audienceTitle',
+  'audiences',
+  'techTitle',
+  'techIntro',
+  'techItems',
+  'downloadTitle',
+  'downloadSubtitle',
+  'appStoreUrl',
+  'playStoreUrl',
+  'footerTagline',
+] as const;
+
+function landingPayload(
+  locale: string,
+  raw: Record<string, unknown>,
+): Prisma.LandingPageCreateInput {
+  const data: Record<string, unknown> = { id: locale };
+  for (const key of LANDING_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(raw, key)) {
+      data[key] = raw[key];
+    }
+  }
+  return data as Prisma.LandingPageCreateInput;
+}
 
 async function main() {
   // 1. Specialties
@@ -17,7 +62,11 @@ async function main() {
     { nameAr: 'الأسنان', nameEn: 'Dentistry' },
   ];
 
-const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  for (const s of specialtiesData) {
+  const specialties: Awaited<
+    ReturnType<typeof prisma.specialty.create>
+  >[] = [];
+
+  for (const s of specialtiesData) {
     let specialty = await prisma.specialty.findFirst({
       where: { nameEn: s.nameEn },
     });
@@ -29,7 +78,7 @@ const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  
 
   console.log(`Seeded ${specialties.length} specialties`);
 
-  // 2. A sample doctor
+  // 2. Sample doctor
   const doctorPhone = '07700000001';
   let doctorUser = await prisma.user.findUnique({
     where: { phone: doctorPhone },
@@ -92,7 +141,7 @@ const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  
     `Seeded doctor: ${doctorUser.fullName} (${doctorPhone} / doctor1234)`,
   );
 
-  // 3. A sample patient with a topped-up wallet
+  // 3. Sample patient with wallet
   const patientPhone = '07700000002';
   let patientUser = await prisma.user.findUnique({
     where: { phone: patientPhone },
@@ -117,9 +166,11 @@ const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  
     `Seeded patient: ${patientUser.fullName} (${patientPhone} / patient1234) with 100,000 wallet balance`,
   );
 
-  // Admin owner account for landing CMS
+  // 4. Admin for landing CMS
   const adminPhone = '07700000000';
-  let adminUser = await prisma.user.findUnique({ where: { phone: adminPhone } });
+  let adminUser = await prisma.user.findUnique({
+    where: { phone: adminPhone },
+  });
   if (!adminUser) {
     adminUser = await prisma.user.create({
       data: {
@@ -136,17 +187,24 @@ const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  
       data: { role: 'ADMIN' },
     });
   }
-  console.log(`Seeded admin: ${adminUser.fullName} (${adminPhone} / admin1234)`);
+  console.log(
+    `Seeded admin: ${adminUser.fullName} (${adminPhone} / admin1234)`,
+  );
 
-  // Landing CMS defaults (ar / en / ku)
-  await prisma.landingPage.deleteMany({ where: { id: 'main' } }).catch(() => undefined);
+  // 5. Landing CMS (ar / en / ku)
+  await prisma.landingPage
+    .deleteMany({ where: { id: 'main' } })
+    .catch(() => undefined);
+
   for (const locale of LANDING_LOCALES) {
     const raw = defaultLandingByLocale[locale] as Record<string, unknown>;
-    const { logoUrl: _logoUrl, ...data } = raw;
+    const data = landingPayload(locale, raw);
+    const { id, ...updateData } = data;
+
     const landing = await prisma.landingPage.upsert({
       where: { id: locale },
-      create: { id: locale, ...data } as never,
-      update: data as never,
+      create: data,
+      update: updateData,
     });
     console.log(`Seeded landing page [${locale}]: ${landing.brandName}`);
   }
@@ -157,6 +215,15 @@ const specialties: Awaited<ReturnType<typeof prisma.specialty.create>>[] = [];  
 main()
   .catch((e) => {
     console.error(e);
+    if (e?.code === 'P2021') {
+      console.error(
+        '\nDatabase tables are missing. Create them first, then seed:\n' +
+          '  npx prisma db push\n' +
+          '  npm run seed\n' +
+          'Or in one step:\n' +
+          '  npm run db:setup\n',
+      );
+    }
     process.exit(1);
   })
   .finally(async () => {
